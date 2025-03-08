@@ -7,19 +7,23 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Post as PostDocument } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { updatePostDto } from './dto/update-post.dto';
-
+import { Query as ExpressQuery } from 'express-serve-static-core';
 @Controller('api/v1/posts')
 export class PostController {
   constructor(private PostService: PostService) {}
 
   @Get()
-  async getAllPosts(): Promise<PostDocument[]> {
-    return await this.PostService.findAll();
+  async getAllPosts(
+    @Query() query: ExpressQuery,
+  ): Promise<{ result: number; posts: PostDocument[] }> {
+    const posts = await this.PostService.findAll(query);
+    return { result: posts.length, posts };
   }
 
   @Post()
