@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './schemas/post.schema';
 import mongoose from 'mongoose';
 import { User } from '../auth/schemas/user.schema';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class PostService {
@@ -15,13 +17,21 @@ export class PostService {
     private PostModel: mongoose.Model<Post>,
   ) {}
 
-  async findAll(): Promise<Post[] | []> {
+  async findAll(
+    @Query() query: ExpressQuery,
+  ): Promise<{ posts: Post[] | []; postsCount: number }> {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 2;
+    const skip = (page - 1) * limit;
+    const postsCount = await this.PostModel.countDocuments();
     const posts = await this.PostModel.find()
+      .limit(limit)
+      .skip(skip)
       .sort('-createdAt')
       .populate('author', 'name email')
       .exec();
 
-    return posts;
+    return { posts, postsCount };
   }
 
   async create(post: Post, user: User): Promise<Post> {

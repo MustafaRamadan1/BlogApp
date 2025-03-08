@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -13,17 +14,19 @@ import { PostService } from './post.service';
 import { Post as PostDocument } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Query as ExpressQuery } from 'express-serve-static-core';
+
 @Controller('api/v1/posts')
 export class PostController {
   constructor(private PostService: PostService) {}
 
   @Get()
-  async getAllPosts(): Promise<{
+  async getAllPosts(@Query() query: ExpressQuery): Promise<{
     postsCount: number;
     posts: PostDocument[] | [];
   }> {
-    const posts = await this.PostService.findAll();
-    return { postsCount: posts.length, posts };
+    const posts = await this.PostService.findAll(query);
+    return { postsCount: posts.postsCount, posts: posts.posts };
   }
 
   @Post()
