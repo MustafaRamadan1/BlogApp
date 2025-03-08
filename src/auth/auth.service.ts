@@ -1,5 +1,9 @@
 import { SignUpDto } from './dto/signup.dto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -19,6 +23,11 @@ export class AuthService {
     signUpDto: SignUpDto,
   ): Promise<{ name: string; email: string; token: string }> {
     const { name, email, password } = signUpDto;
+
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      throw new BadRequestException('Email already in use');
+    }
 
     const newUser = await this.userModel.create({
       name,
