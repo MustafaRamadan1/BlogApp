@@ -6,7 +6,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './schemas/post.schema';
 import mongoose from 'mongoose';
-import { Query as ExpressQuery } from 'express-serve-static-core';
 import { User } from '../auth/schemas/user.schema';
 
 @Injectable()
@@ -16,22 +15,12 @@ export class PostService {
     private PostModel: mongoose.Model<Post>,
   ) {}
 
-  async findAll(query: ExpressQuery): Promise<Post[] | []> {
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 2;
-    const skip = (page - 1) * limit;
-    const postsDocumentsCount = await this.PostModel.countDocuments();
-    let posts: Post[] = [];
-    if (skip > postsDocumentsCount) {
-      return posts;
-    } else {
-      posts = await this.PostModel.find()
-        .limit(limit)
-        .skip(skip)
-        .sort('-createdAt')
-        .populate('author', 'name email')
-        .exec();
-    }
+  async findAll(): Promise<Post[] | []> {
+    const posts = await this.PostModel.find()
+      .sort('-createdAt')
+      .populate('author', 'name email')
+      .exec();
+
     return posts;
   }
 
