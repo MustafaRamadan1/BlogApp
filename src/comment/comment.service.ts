@@ -65,12 +65,21 @@ export class CommentService {
     return comment;
   }
 
-  async findPostComments(id: string): Promise<Comment[] | []> {
+  async findPostComments(
+    id: string,
+    query: ExpressQuery,
+  ): Promise<{ comments: Comment[] | []; commentsCount: number }> {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 2;
+    const skip = Number(page - 1) * limit;
+    const commentsCount = await this.commentModel.countDocuments();
     const comments = await this.commentModel
       .find({ post: id })
       .sort('-createdAt')
+      .limit(limit)
+      .skip(skip)
       .populate('user', 'name email')
       .exec();
-    return comments;
+    return { commentsCount, comments };
   }
 }

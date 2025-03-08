@@ -21,9 +21,13 @@ export class CommentController {
   @Get(':postId')
   async getPostComments(
     @Param('postId') postId: string,
+    @Query() query: ExpressQuery,
   ): Promise<{ commentsCount: number; comments: Comment[] }> {
-    const comments = await this.commentService.findPostComments(postId);
-    return { commentsCount: comments.length, comments };
+    const comments = await this.commentService.findPostComments(postId, query);
+    return {
+      commentsCount: comments.commentsCount,
+      comments: comments.comments,
+    };
   }
 
   @Post()
