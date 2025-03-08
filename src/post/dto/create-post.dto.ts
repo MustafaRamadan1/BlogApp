@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString, MinLength, IsMongoId } from 'class-validator';
+import { User } from 'src/auth/schemas/user.schema';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -13,5 +14,5 @@ export class CreatePostDto {
 
   @IsNotEmpty()
   @IsMongoId()
-  readonly author: string;
+  readonly author: User;
 }
