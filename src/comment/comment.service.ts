@@ -72,7 +72,8 @@ export class CommentService {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 2;
     const skip = Number(page - 1) * limit;
-    const commentsCount = await this.commentModel.countDocuments();
+    const commentsCount = await this.commentModel.countDocuments({ post: id });
+
     const comments = await this.commentModel
       .find({ post: id })
       .sort('-createdAt')
