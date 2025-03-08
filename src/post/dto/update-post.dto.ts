@@ -10,7 +10,4 @@ export class updatePostDto {
   @IsString()
   @MinLength(5)
   readonly content: string;
-  @IsOptional()
-  @IsString()
-  readonly author: User;
 }

@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, MinLength, IsMongoId } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsMongoId,
+  IsEmpty,
+} from 'class-validator';
 import { User } from 'src/auth/schemas/user.schema';
 
 export class CreatePostDto {
@@ -12,7 +18,6 @@ export class CreatePostDto {
   @MinLength(5)
   readonly content: string;
 
-  @IsNotEmpty()
-  @IsMongoId()
+  @IsEmpty({ message: 'You are not allowed to pass your ID' })
   readonly author: User;
 }

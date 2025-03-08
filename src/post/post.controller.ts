@@ -8,12 +8,15 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Post as PostDocument } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { updatePostDto } from './dto/update-post.dto';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+import { AuthGuard } from '@nestjs/passport';
 @Controller('api/v1/posts')
 export class PostController {
   constructor(private PostService: PostService) {}
@@ -27,8 +30,9 @@ export class PostController {
   }
 
   @Post()
-  async create(@Body() post: CreatePostDto): Promise<PostDocument> {
-    const newPost = await this.PostService.create(post);
+  @UseGuards(AuthGuard())
+  async create(@Body() post: CreatePostDto, @Req() req): Promise<PostDocument> {
+    const newPost = await this.PostService.create(post, req.user);
     return newPost;
   }
 
@@ -42,14 +46,15 @@ export class PostController {
     return post;
   }
 
-  @Put(':id')
-  async updateById(
-    @Param('id') id: string,
-    @Body() updatedPost: updatePostDto,
-  ) {
-    console.log(updatedPost);
-    return await this.PostService.updateById(id, updatedPost);
-  }
+  // @Put(':id')
+  // @UseGuards(AuthGuard())
+  // async updateById(
+  //   @Param('id') id: string,
+  //   @Body() updatedPost: updatePostDto,
+  //   @Req() req,
+  // ) {
+  //   return await this.PostService.updateById(id, updatedPost);
+  // }
 
   @Delete(':id')
   async deleteById(@Param('id') id: string): Promise<PostDocument | null> {

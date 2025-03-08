@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './schemas/post.schema';
 import mongoose from 'mongoose';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+import { User } from '../auth/schemas/user.schema';
 
 @Injectable()
 export class PostService {
@@ -34,8 +35,10 @@ export class PostService {
     return posts;
   }
 
-  async create(post: Post): Promise<Post> {
-    const newPost = await this.PostModel.create(post);
+  async create(post: Post, user: User): Promise<Post> {
+    const data = Object.assign(post, { author: user._id });
+
+    const newPost = await this.PostModel.create(data);
     return newPost;
   }
 
@@ -61,14 +64,17 @@ export class PostService {
     if (!isValidId) {
       throw new BadRequestException(`Invalid Post ID: ${id}`);
     }
+
+    const targetedPost = await this.PostModel.findById(id);
+    if (!targetedPost) {
+      throw new NotFoundException(`No Post found with ID: ${id}`);
+    }
+
     const post = await this.PostModel.findByIdAndUpdate(id, updatedPost, {
       new: true,
       runValidators: true,
     });
 
-    if (!post) {
-      throw new NotFoundException(`No Post found with ID: ${id}`);
-    }
     return post;
   }
 
